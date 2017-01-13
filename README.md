@@ -11,13 +11,11 @@ Links for public DNS blacklists services
 Example for squid external_acl_type usage configurations
 -----
 ```
-acl CONNECT method CONNECT
+external_acl_type dnsbl_check ipv4 concurrency=200 ttl=15 %DST %SRC %METHOD /opt/bin/squid-external-acl-helper -peers-filename=/opt/bin/peersfile.txt
+acl dnsbl_check_acl external dnsbl_check
+deny_info http://ngtech.co.il/block_page/?url=%u&domain=%H dnsbl_check_acl
 
-external_acl_type dnsbl_check ipv4 concurrency=200 ttl=15 %DST %SRC %METHOD /opt/bin/squid-external-acl-helper -peers-filename=peersfile.txt -debug
-acl dnsbl_checl_acl external dnsbl_check
-deny_info http://ngtech.co.il/block_page/?url=%u&domain=%H log_doms_acl
-
-http_access deny !dnsbl_checl_acl
+http_access deny dnsbl_check_acl
 ```
 
 License
