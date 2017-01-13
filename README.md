@@ -8,6 +8,18 @@ Links for public DNS blacklists services
  - [Norton dns blacklists information](https://dns.norton.com/faq.html)
  - [OpenDNS Home Internet Security](https://www.opendns.com/home-internet-security/)
 
+Example for squid external_acl_type usage configurations
+-----
+```
+acl CONNECT method CONNECT
+
+external_acl_type dnsbl_check ipv4 concurrency=200 ttl=15 %DST %SRC %METHOD /opt/bin/squid-external-acl-helper -peers-filename=peersfile.txt -debug
+acl dnsbl_checl_acl external dnsbl_check
+deny_info http://ngtech.co.il/block_page/?url=%u&domain=%H log_doms_acl
+
+http_access deny !dnsbl_checl_acl
+```
+
 License
 -------
 Copyright (c) 2016, Eliezer Croitoru
