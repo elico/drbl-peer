@@ -1,7 +1,7 @@
 package drblpeer
 
 import (
-//	"../watcher"
+	//	"../watcher"
 	"fmt"
 	"github.com/asaskevich/govalidator"
 	"github.com/bogdanovich/dns_resolver"
@@ -204,7 +204,7 @@ func PeerListWatcher(filename string, peersList *DrblPeers, debug bool) {
 func (peersList *DrblPeers) Check(hostname string) (bool, int64) {
 	block := false
 
-	ch := make(chan int64)
+	ch := make(chan int64, 1)
 
 	for _, peer := range peersList.Peers {
 		go func(peer DrblClient) {
