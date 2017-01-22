@@ -11,7 +11,7 @@ import (
 	"strconv"
 	"strings"
 	"sync/atomic"
-	"time"
+	//"time"
 )
 
 var spacesAndTabs = regexp.MustCompile(`[\s\t]+`)
@@ -204,63 +204,39 @@ func PeerListWatcher(filename string, peersList *DrblPeers, debug bool) {
 func (peersList *DrblPeers) Check(hostname string) (bool, int64) {
 	block := false
 
-	ch := make(chan int64, 1)
-
-	for _, peer := range peersList.Peers {
-		go func(peer DrblClient) {
-			found, allowaccess, admin, key, err := peer.Check(hostname)
-			if err != nil {
-				if peersList.Debug {
-					fmt.Println("peer", peer.Peername, "had an error", err)
-				}
-				ch <- 0
-			}
-			if peersList.Debug {
-				fmt.Println("peer", peer.Peername, ", results =>", found, allowaccess, admin, key)
-			}
-
-			if found && !allowaccess {
-				ch <- peer.Weight
-			} else {
-				ch <- 0
-			}
-		}(peer)
-	}
-
 	localWeight := peersList.HitWeight
 	peersNumber := int64(len(peersList.Peers))
+
 	if peersList.Debug {
 		fmt.Println("Peers number", peersNumber)
 	}
-	if len(peersList.Peers) > 0 {
-		for {
-			if peersList.Debug {
-				fmt.Println("Peers number inside FOR", peersNumber)
-			}
-			if peersNumber <= 0 {
-				break
-			}
-			select {
-			case r := <-ch:
-				if peersList.Debug {
-					fmt.Println("Peers sent ", r)
-				}
-				atomic.AddInt64(&localWeight, -r)
-				atomic.AddInt64(&peersNumber, -1)
-			case <-time.After(time.Duration(peersList.Timeout) * time.Second):
-				// Return 0
-				break
-			}
-			if localWeight <= int64(0) {
-				block = true
-				return block, localWeight
-			}
-		}
-	}
-	if localWeight <= int64(0) {
-		block = true
-		return block, localWeight
-	}
 
+	for _, peer := range peersList.Peers {
+		if localWeight <= int64(0) {
+			block = true
+			return block, localWeight
+		}
+
+		found, allowaccess, admin, key, err := peer.Check(hostname)
+		if err != nil {
+			if peersList.Debug {
+				fmt.Println("peer", peer.Peername, "had an error", err)
+			}
+			continue
+		}
+		if peersList.Debug {
+			fmt.Println("peer", peer.Peername, ", results =>", found, allowaccess, admin, key)
+		}
+
+		if found && !allowaccess {
+			if peersList.Debug {
+				fmt.Println("Peer", peer.Peername, "weigth =>", peer.Weight)
+			}
+			atomic.AddInt64(&localWeight, -peer.Weight)
+		} else {
+			atomic.AddInt64(&localWeight, -peer.Weight)
+		}
+		atomic.AddInt64(&peersNumber, -1)
+	}
 	return block, localWeight
 }
