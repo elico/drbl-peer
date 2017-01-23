@@ -78,7 +78,14 @@ func (instance *DrblClient) Check(hostname string) (bool, bool, bool, string, er
 		if len(hostname) > 1 {
 			ip, err := instance.Resolver.LookupHost(hostname)
 			if err != nil {
+				//SHould not always be on.. dpends on the err For now it's on
+				switch {
+				case strings.Contains(err.Error(), "NXDOMAIN"):
+					//it's fine and possible
+				default:
 				fmt.Println(instance, "Got error on lookup for", hostname, "ERROR:", err)
+				}
+
 				return found, true, admin, key, err
 			}
 
