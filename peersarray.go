@@ -228,12 +228,12 @@ func (peersList *DrblPeers) Check(hostname string) (bool, int64) {
 
 		if found && !allowaccess {
 			if peersList.Debug {
-				fmt.Println("Peer", peer.Peername, "weigth =>", peer.Weight, "hostname =>," hostname)
+				fmt.Println("Peer", peer.Peername, "weigth =>", peer.Weight, "hostname =>,", hostname)
 			}
 			atomic.AddInt64(&localWeight, -peer.Weight)
 		} else {
 			if peersList.Debug {
-				fmt.Println("Peer", peer.Peername, "weigth =>", peer.Weight, "hostname =>," hostname)
+				fmt.Println("Peer", peer.Peername, "weigth =>", peer.Weight, "hostname =>,", hostname)
 			}
 		}
 	}
