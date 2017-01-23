@@ -63,8 +63,8 @@ func NewPeerListFromFile(filename string, hitWeight int64, timeout int, debug bo
 			}
 		}
 	}
-	if peersList.Debug {
-		fmt.Println("Peers number", int64(len(peersList.Peers)))
+	if newlist.Debug {
+		fmt.Println("Peers number", int64(len(newlist.Peers)))
 	}
 	return newlist, nil
 }
