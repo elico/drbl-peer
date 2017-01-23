@@ -1,13 +1,13 @@
 package drblpeer
 
 import (
+	"fmt"
 	"github.com/asaskevich/govalidator"
 	"github.com/bogdanovich/dns_resolver"
 	"net/http"
 	"net/url"
 	"strconv"
 	"strings"
-	//	"fmt"
 )
 
 type DrblClient struct {
@@ -78,10 +78,8 @@ func (instance *DrblClient) Check(hostname string) (bool, bool, bool, string, er
 		if len(hostname) > 1 {
 			ip, err := instance.Resolver.LookupHost(hostname)
 			if err != nil {
-				/* to debug use this:
-				//fmt.Println(instance, "Got error on lookup for", hostname)
-				*/
-				return found, false, admin, key, err
+				fmt.Println(instance, "Got error on lookup for", hostname, "ERROR:", err)
+				return found, true, admin, key, err
 			}
 
 			//	I could have added a loop over loop to verify that each host from the results
