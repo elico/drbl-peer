@@ -208,7 +208,6 @@ func (peersList *DrblPeers) Check(hostname string) (bool, int64) {
 	block := false
 
 	localWeight := peersList.HitWeight
-	peersNumber := int64(len(peersList.Peers))
 
 	for _, peer := range peersList.Peers {
 		if localWeight <= int64(0) {
@@ -219,7 +218,7 @@ func (peersList *DrblPeers) Check(hostname string) (bool, int64) {
 		found, allowaccess, admin, key, err := peer.Check(hostname)
 		if err != nil {
 			if peersList.Debug {
-				fmt.Println("peer", peer.Peername, "had an error", err, "while checking:", hostname)
+				fmt.Println("peer", peer.Peername, "had an error", err, "while checking:", hostname, "Allow acces:", allowaccess)
 			}
 			continue
 		}
@@ -229,13 +228,14 @@ func (peersList *DrblPeers) Check(hostname string) (bool, int64) {
 
 		if found && !allowaccess {
 			if peersList.Debug {
-				fmt.Println("Peer", peer.Peername, "weigth =>", peer.Weight, "hostname =>, hostname")
+				fmt.Println("Peer", peer.Peername, "weigth =>", peer.Weight, "hostname =>," hostname)
 			}
 			atomic.AddInt64(&localWeight, -peer.Weight)
 		} else {
-			atomic.AddInt64(&localWeight, -peer.Weight)
+			if peersList.Debug {
+				fmt.Println("Peer", peer.Peername, "weigth =>", peer.Weight, "hostname =>," hostname)
+			}
 		}
-		atomic.AddInt64(&peersNumber, -1)
 	}
 	return block, localWeight
 }
