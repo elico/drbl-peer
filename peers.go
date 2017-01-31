@@ -50,7 +50,9 @@ func (instance *DrblClient) Check(hostname string) (bool, bool, bool, string, er
 		testurl, _ := url.Parse(instance.Protocol + "://" + instance.Peername + ":" + strconv.Itoa(instance.Port) + instance.Path)
 		testurlVals := url.Values{}
 		testurlVals.Set("host", hostname)
+		testurlVals.Set("port", "0")
 		testurl.RawQuery = testurlVals.Encode()
+
 
 		request, err := http.NewRequest("HEAD", testurl.String(), nil)
 		//request.SetBasicAuth(*user, *pass)
@@ -83,7 +85,7 @@ func (instance *DrblClient) Check(hostname string) (bool, bool, bool, string, er
 				case strings.Contains(err.Error(), "NXDOMAIN"):
 					//it's fine and possible
 				default:
-				fmt.Println(instance, "Got error on lookup for", hostname, "ERROR:", err)
+					fmt.Println(instance, "Got error on lookup for", hostname, "ERROR:", err)
 				}
 
 				return found, true, admin, key, err
