@@ -240,5 +240,8 @@ func (peersList *DrblPeers) Check(hostname string) (bool, int64) {
 			}
 		}
 	}
+	if localWeight <= int64(0) {
+		block = true
+	}
 	return block, localWeight
 }
