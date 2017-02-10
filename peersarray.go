@@ -4,7 +4,9 @@ import (
 	//	"../watcher"
 	"fmt"
 	"github.com/asaskevich/govalidator"
-	"github.com/bogdanovich/dns_resolver"
+	//"github.com/bogdanovich/dns_resolver"
+	"github.com/elico/dns_resolver"
+
 	"io/ioutil"
 	"net/http"
 	"regexp"
