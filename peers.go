@@ -81,6 +81,9 @@ func (instance *DrblClient) Check(hostname string, debug bool) (bool, bool, bool
 
 	case instance.Protocol == "dns":
 		if len(hostname) > 1 {
+			if debug {
+				fmt.Fprintln(os.Stderr, "trying to match hostname =>", hostname, "to dns hostname =>", hostname)
+			}
 			ip, err := instance.Resolver.LookupHost(hostname)
 			if err != nil {
 				//SHould not always be on.. dpends on the err For now it's on
@@ -99,7 +102,7 @@ func (instance *DrblClient) Check(hostname string, debug bool) (bool, bool, bool
 
 			if err == nil && len(ip) > 0 {
 				for _, block := range instance.BlResponses {
-					fmt.Fprintln(os.Stderr, "tryiing to match resposne =>", ip[0].String(), "to blacklisting responst =>", block)
+					fmt.Fprintln(os.Stderr, "tryiing to match resposne =>", ip[0].String(), "to blacklisting response =>", block)
 					if ip[0].String() == block {
 						found = true
 						allow = false
@@ -114,6 +117,10 @@ func (instance *DrblClient) Check(hostname string, debug bool) (bool, bool, bool
 			hostname = ReverseTheDomain(hostname)
 		}
 		if len(hostname) > 1 {
+			// in a RBL compared to BL the request domains is being tested as a prefix to the domain of the RBL
+			if debug {
+				fmt.Fprintln(os.Stderr, "trying to match hostname =>", hostname, "to dnsrbl hostname =>", hostname+"."+instance.Peername)
+			}
 			ip, err := instance.Resolver.LookupHost(hostname + "." + instance.Peername)
 			if err != nil {
 				return found, false, admin, key, err
@@ -122,7 +129,7 @@ func (instance *DrblClient) Check(hostname string, debug bool) (bool, bool, bool
 			if err == nil && len(ip) > 0 {
 				for _, block := range instance.BlResponses {
 					if debug {
-						fmt.Fprintln(os.Stderr, "tryiing to match resposne =>", ip[0].String(), "to blacklisting responst =>", block)
+						fmt.Fprintln(os.Stderr, "tryiing to match resposne =>", ip[0].String(), "to blacklisting response =>", block)
 					}
 					if ip[0].String() == block {
 						found = true
