@@ -2,6 +2,7 @@ package drblpeer
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/asaskevich/govalidator"
 	//"github.com/bogdanovich/dns_resolver"
@@ -42,7 +43,7 @@ func New(peerName, protocol, path string, port int, weight int64, bladdr []strin
 */
 
 // return: found, allow\deny, admin\nonadmin, error)
-func (instance *DrblClient) Check(hostname string) (bool, bool, bool, string, error) {
+func (instance *DrblClient) Check(hostname string, debug bool) (bool, bool, bool, string, error) {
 	found := false
 	admin := false
 	allow := true
@@ -98,6 +99,7 @@ func (instance *DrblClient) Check(hostname string) (bool, bool, bool, string, er
 
 			if err == nil && len(ip) > 0 {
 				for _, block := range instance.BlResponses {
+					fmt.Fprintln(os.Stderr, "tryiing to match resposne =>", ip[0].String(), "to blacklisting responst =>", block)
 					if ip[0].String() == block {
 						found = true
 						allow = false
@@ -119,6 +121,9 @@ func (instance *DrblClient) Check(hostname string) (bool, bool, bool, string, er
 
 			if err == nil && len(ip) > 0 {
 				for _, block := range instance.BlResponses {
+					if debug {
+						fmt.Fprintln(os.Stderr, "tryiing to match resposne =>", ip[0].String(), "to blacklisting responst =>", block)
+					}
 					if ip[0].String() == block {
 						found = true
 						allow = false

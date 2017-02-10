@@ -218,7 +218,7 @@ func (peersList *DrblPeers) Check(hostname string) (bool, int64) {
 			return block, localWeight
 		}
 
-		found, allowaccess, admin, key, err := peer.Check(hostname)
+		found, allowaccess, admin, key, err := peer.Check(hostname, peersList.Debug)
 		if err != nil {
 			if peersList.Debug {
 				fmt.Println("peer", peer.Peername, "had an error", err, "while checking:", hostname, "Allow acces:", allowaccess)
