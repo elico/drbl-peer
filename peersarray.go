@@ -3,6 +3,7 @@ package drblpeer
 import (
 	//	"../watcher"
 	"fmt"
+	"sync/atomic"
 
 	"github.com/asaskevich/govalidator"
 	//"github.com/bogdanovich/dns_resolver"
@@ -13,7 +14,6 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-	"sync/atomic"
 	//"time"
 )
 
@@ -226,17 +226,19 @@ func (peersList *DrblPeers) Check(hostname string) (bool, int64) {
 			continue
 		}
 		if peersList.Debug {
-			fmt.Println("peer", peer.Peername, ", results =>", found, allowaccess, admin, key, hostname)
+			fmt.Println("peer", peer.Peername, ", results: found =>", found, "allow-access =>", allowaccess, "admin =>", admin, "key =>", key, "hostname =>", hostname)
 		}
 
+		if found {
+			atomic.AddInt64(&localWeight, -peer.Weight)
+		}
 		if found && !allowaccess {
 			if peersList.Debug {
-				fmt.Println("Peer", peer.Peername, "weigth =>", peer.Weight, "hostname =>,", hostname)
+				fmt.Println("Peer", peer.Peername, "weigth =>", peer.Weight, "hostname =>,", hostname, "!allowaccess")
 			}
-			atomic.AddInt64(&localWeight, -peer.Weight)
 		} else {
 			if peersList.Debug {
-				fmt.Println("Peer", peer.Peername, "weigth =>", peer.Weight, "hostname =>,", hostname)
+				fmt.Println("Peer", peer.Peername, "weigth =>", peer.Weight, "hostname =>,", hostname, "allowaccess")
 			}
 		}
 	}
