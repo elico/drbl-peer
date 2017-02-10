@@ -112,7 +112,7 @@ func NewPeerFromLine(peerline string) (*DrblClient, error) {
 			if !govalidator.IsHost(lparts[1]) {
 				return &DrblClient{}, fmt.Errorf("%s is not a valid hostname or ip address", lparts[1])
 			}
-			// http\dns\dnsbl ip\domain /path/vote/ port weigth bl ip's
+			// http\dns\dnsrbl ip\domain /path/vote/ port weigth bl ip's
 			// 0								1					2						3			4			5
 			switch {
 			case lparts[0] == "http" || lparts[0] == "https":
@@ -142,7 +142,7 @@ func NewPeerFromLine(peerline string) (*DrblClient, error) {
 					dns_resolver.NewWithPort([]string{lparts[1]}, strconv.Itoa(int(port))),
 					&http.Client{},
 				}, nil
-			case lparts[0] == "dnsbl":
+			case lparts[0] == "dnsrbl":
 				blIpAddr := make([]string, 1)
 				for _, addr := range lparts[5:] {
 					if govalidator.IsIPv4(addr) {
