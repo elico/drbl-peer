@@ -3,6 +3,7 @@ package drblpeer
 import (
 	//	"../watcher"
 	"fmt"
+
 	"github.com/asaskevich/govalidator"
 	//"github.com/bogdanovich/dns_resolver"
 	"github.com/elico/dns_resolver"
@@ -138,7 +139,7 @@ func NewPeerFromLine(peerline string) (*DrblClient, error) {
 					int64(weight),
 					lparts[0],
 					blIpAddr,
-					dns_resolver.New([]string{lparts[1]}),
+					dns_resolver.NewWithPort([]string{lparts[1]}, strconv.Itoa(int(port))),
 					&http.Client{},
 				}, nil
 			case lparts[0] == "dnsbl":
@@ -154,7 +155,7 @@ func NewPeerFromLine(peerline string) (*DrblClient, error) {
 					int64(weight),
 					lparts[0],
 					blIpAddr,
-					dns_resolver.New([]string{lparts[1]}),
+					dns_resolver.NewWithPort([]string{lparts[1]}, strconv.Itoa(int(port))),
 					&http.Client{},
 				}, nil
 			}
