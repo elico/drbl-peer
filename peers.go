@@ -2,12 +2,15 @@ package drblpeer
 
 import (
 	"fmt"
+
 	"github.com/asaskevich/govalidator"
-	"github.com/bogdanovich/dns_resolver"
+	//"github.com/bogdanovich/dns_resolver"
 	"net/http"
 	"net/url"
 	"strconv"
 	"strings"
+
+	"github.com/elico/dns_resolver"
 )
 
 type DrblClient struct {
@@ -28,7 +31,7 @@ func New(peerName, protocol, path string, port int, weight int64, bladdr []strin
 		weight,
 		protocol,
 		bladdr,
-		dns_resolver.New([]string{peerName}),
+		dns_resolver.NewWithPort([]string{peerName}, strconv.Itoa(port)),
 		&http.Client{},
 	}
 }
@@ -52,7 +55,6 @@ func (instance *DrblClient) Check(hostname string) (bool, bool, bool, string, er
 		testurlVals.Set("host", hostname)
 		testurlVals.Set("port", "0")
 		testurl.RawQuery = testurlVals.Encode()
-
 
 		request, err := http.NewRequest("HEAD", testurl.String(), nil)
 		//request.SetBasicAuth(*user, *pass)
