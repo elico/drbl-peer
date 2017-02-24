@@ -102,7 +102,9 @@ func (instance *DrblClient) Check(hostname string, debug bool) (bool, bool, bool
 
 			if err == nil && len(ip) > 0 {
 				for _, block := range instance.BlResponses {
-					fmt.Fprintln(os.Stderr, "tryiing to match resposne =>", ip[0].String(), "to blacklisting response =>", block)
+					if debug {
+						fmt.Fprintln(os.Stderr, "trying to match resposne =>", ip[0].String(), "to blacklisting response =>", block)
+					}
 					if ip[0].String() == block {
 						found = true
 						allow = false
