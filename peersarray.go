@@ -8,7 +8,7 @@ import (
 	"github.com/asaskevich/govalidator"
 	//"github.com/bogdanovich/dns_resolver"
 	"github.com/elico/dns_resolver"
-
+	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"net/http"
 	"regexp"
@@ -29,6 +29,20 @@ type DrblPeers struct {
 		ReverseOrderIpv4Lookup bool
 		Ipv6Lookup bool
 	*/
+}
+
+type YamlPeerDrblName struct {
+	Peer     string   `name`
+	Type     string   `type`
+	Host     string   `host`
+	Port     int      `port`
+	Weight   int      `weight`
+	Path     string   `path`
+	Expected []string `expected`
+}
+
+type YamlDrblPeers struct {
+	Clients []YamlPeerDrblName `peers`
 }
 
 func NewPeerListFromFile(filename string, hitWeight int64, timeout int, debug bool) (*DrblPeers, error) {
@@ -70,6 +84,124 @@ func NewPeerListFromFile(filename string, hitWeight int64, timeout int, debug bo
 		fmt.Println("Peers number", int64(len(newlist.Peers)))
 	}
 	return newlist, nil
+}
+
+func NewPeerListFromYamlFile(filename string, hitWeight int64, timeout int, debug bool) (*DrblPeers, error) {
+	//peerName, protocol, path string, port int, weight int64, bladdr []string 	) *DrblClient
+	// mainDrbPeer := drblpeer.New("199.85.126.20", "dns", "", 53, int64(128), []string{"156.154.175.216", "156.154.176.216"})
+	// drblPeers := *drblpeer.DrblPeers{[]DrblClient{}, int64(128), 30, true}
+
+	//var drblPeers drblpeer.DrblPeers{[]drblpeer.DrblClient{*mainDrbPeer}, int64(128), 30, true}
+
+	// Read whole file
+	// Split lines
+	// Walk on the lines
+	// If the line syntax is fine add it else move on
+	// Swap the drbl peers list
+
+	var peers YamlDrblPeers
+	content, err := ioutil.ReadFile(filename)
+	if err != nil {
+		return &DrblPeers{}, err
+	}
+	err = yaml.Unmarshal(content, &peers)
+	if err != nil {
+		return &DrblPeers{}, err
+	}
+	peersClient := make([]DrblClient, 0)
+	newlist := &DrblPeers{peersClient, hitWeight, timeout, debug}
+
+	for _, client := range peers.Clients {
+		peer, err := NewPeerFromYaml(client)
+		if err != nil {
+			if debug {
+				fmt.Println(err)
+			}
+			continue
+			} else {
+				newlist.Peers = append(newlist.Peers, *peer)
+			}
+			if newlist.Debug {
+				fmt.Println("Peers number", int64(len(newlist.Peers)))
+			}
+			return newlist, nil
+	}
+	return newlist, nil
+}
+
+func NewPeerFromYaml(peer YamlPeerDrblName) (*DrblClient, error) {
+
+  		port := uint(peer.Port) //port
+			weight:= uint(peer.Weight) //weight
+
+			/*
+				switch {
+				case govalidator.IsIP(lparts[1]):
+					;;
+				case govalidator.IsDNSName(lparts[1]):
+					if lparts[0] != "http" {
+						addr, err := net.LookupHost(lparts[1])
+						if err != nil {
+								return &DrblClient{}, fmt.Errorf("%s hostname cannot be resolved", lparts[1])
+						}
+						// Choosing a static IP address
+						lparts[1] = addr[0]
+					}
+				default:
+					return &DrblClient{}, fmt.Errorf("%s is not a valid hostname or ip address", lparts[1])
+				}
+			*/
+			if !govalidator.IsHost(peer.Host) {
+				return &DrblClient{}, fmt.Errorf("%s is not a valid hostname or ip address", peer.Host)
+			}
+			// http\dns\dnsrbl ip\domain /path/vote/ port weigth bl ip's
+			// 0								1					2						3			4			5
+			switch {
+			case peer.Type == "http" || peer.Type == "https":
+				return &DrblClient{peer.Host,
+					peer.Path,
+					int(port),
+					int64(weight),
+					peer.Type,
+					[]string{},
+					dns_resolver.New([]string{peer.Host}),
+					&http.Client{},
+				}, nil
+
+			case peer.Type == "dns":
+				blIpAddr := make([]string, 1)
+				for _, addr := range peer.Expected {
+					if govalidator.IsIPv4(addr) {
+						blIpAddr = append(blIpAddr, addr)
+					}
+				}
+				return &DrblClient{peer.Host,
+					peer.Path,
+					int(port),
+					int64(weight),
+					peer.Type,
+					blIpAddr,
+					dns_resolver.NewWithPort([]string{peer.Host}, strconv.Itoa(int(port))),
+					&http.Client{},
+				}, nil
+			case peer.Type == "dnsrbl":
+				blIpAddr := make([]string, 1)
+				for _, addr := range peer.Expected {
+					if govalidator.IsIPv4(addr) {
+						blIpAddr = append(blIpAddr, addr)
+					}
+				}
+				return &DrblClient{peer.Host,
+					peer.Path,
+					int(port),
+					int64(weight),
+					peer.Type,
+					blIpAddr,
+					dns_resolver.NewWithPort([]string{peer.Host}, strconv.Itoa(int(port))),
+					&http.Client{},
+				}, nil
+			}
+		return &DrblClient{}, fmt.Errorf("drblpeer: malformed peerYaml %s", peer)
 }
 
 func NewPeerFromLine(peerline string) (*DrblClient, error) {
