@@ -108,6 +108,10 @@ func NewPeerListFromYamlFile(filename string, hitWeight int64, timeout int, debu
 	if err != nil {
 		return &DrblPeers{}, err
 	}
+	if debug {
+		fmt.Println(string(content))
+		fmt.Println(peers.Clients)
+	}
 	peersClient := make([]DrblClient, 0)
 	newlist := &DrblPeers{peersClient, hitWeight, timeout, debug}
 
@@ -124,7 +128,6 @@ func NewPeerListFromYamlFile(filename string, hitWeight int64, timeout int, debu
 			if newlist.Debug {
 				fmt.Println("Peers number", int64(len(newlist.Peers)))
 			}
-			return newlist, nil
 	}
 	return newlist, nil
 }
