@@ -12,19 +12,16 @@ export CGO_ENABLED=0
 case $GOOS in 
 	windows)
 		go build -o "./bin/`echo $BINARY``echo $GOOS`_`echo $GOARCH`.exe" squid-external-acl-helper.go
-		go build -o "./bin/`echo $BINARY``echo $GOOS`_`echo $GOARCH`-yaml.exe" squid-external-acl-helper-yaml.go
 
 	;;
 	linux)
 		case $GOARCH in 
 			arm)
 				go build -o "./bin/`echo $BINARY``echo $GOOS`_`echo $GOARCH$GOARM`" squid-external-acl-helper.go
-				go build -o "./bin/`echo $BINARY``echo $GOOS`_`echo $GOARCH$GOARM`-yaml" squid-external-acl-helper-yaml.go
 
 			;;
 			*)
 				go build -o "./bin/`echo $BINARY``echo $GOOS`_`echo $GOARCH`" squid-external-acl-helper.go
-				go build -o "./bin/`echo $BINARY``echo $GOOS`_`echo $GOARCH`-yaml" squid-external-acl-helper-yaml.go
 
 			;;
 		esac
@@ -32,7 +29,6 @@ case $GOOS in
 	;;
 	*)
 		go build -o "./bin/`echo $BINARY``echo $GOOS`_`echo $GOARCH`" squid-external-acl-helper.go
-		go build -o "./bin/`echo $BINARY``echo $GOOS`_`echo $GOARCH`-yaml" squid-external-acl-helper-yaml.go
 
 	;;
 esac

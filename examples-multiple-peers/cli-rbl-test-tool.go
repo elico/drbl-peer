@@ -1,10 +1,10 @@
 package main
 
 import (
-	"github.com/elico/drbl-peer"
 	"flag"
 	"fmt"
 	"github.com/chzyer/readline"
+	"github.com/elico/drbl-peer"
 	"io"
 )
 
@@ -12,16 +12,22 @@ var blockWeight int
 var timeout int
 var peersFileName string
 var debug bool
+var yamlconfig bool
 
 func main() {
 	flag.IntVar(&blockWeight, "block-weight", 128, "Peers blacklist weight")
 	flag.IntVar(&timeout, "query-timeout", 30, "Timeout for all peers response")
 	flag.BoolVar(&debug, "debug", false, "Run in debug mode")
+	flag.BoolVar(&yamlconfig, "yamlconfig", false, "Use a yaml formated blacklist file")
 	flag.StringVar(&peersFileName, "peers-filename", "peersfile.txt", "Blacklists peers filename")
 
 	flag.Parse()
 
-	drblPeers, _ := drblpeer.NewPeerListFromFile(peersFileName, int64(blockWeight), timeout, debug)
+	if yamlconfig {
+		drblPeers, _ := drblpeer.NewPeerListFromYamlFile(peersFileName, int64(blockWeight), timeout, debug)
+	} else {
+		drblPeers, _ := drblpeer.NewPeerListFromFile(peersFileName, int64(blockWeight), timeout, debug)
+	}
 	if debug {
 		fmt.Println("Peers", drblPeers)
 	}
