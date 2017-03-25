@@ -399,7 +399,7 @@ func (peersList *DrblPeers) CheckUrlWithSrc(requestUrl, src string) (bool, int64
 		if peer.Protocol == "http" || peer.Protocol == "https" {
 			// OK+		if peersList.Debug {
 			if peersList.Debug {
-				fmt.Println("peer", peer.Peername,"peer-protocol", peer.Protocol, ", results: found =>", found, "allow-access =>", allowaccess, "admin =>", admin, "key =>", key, "url =>", requestUrl, "src =>", src)
+				fmt.Println("peer", peer.Peername,"peer-protocol", peer.Protocol, ", results: found =>", found, "allow-access =>", allowaccess, "admin =>", admin, "url =>", requestUrl, "src =>", src)
 			}
 		} else {
 			continue
