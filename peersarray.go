@@ -389,15 +389,21 @@ func (peersList *DrblPeers) CheckUrlWithSrc(requestUrl, src string) (bool, int64
 	localWeight := peersList.HitWeight
 
 	for _, peer := range peersList.Peers {
-		if peer.Protocol != "http" || peer.Protocol != "https" {
-			continue
-		}
+
 		if localWeight <= int64(0) {
 			block = true
 			return block, localWeight
 		}
 
 		found, allowaccess, admin, key, err := peer.HttpCheckUrlWithSrc(requestUrl, src, peersList.Debug)
+		if peer.Protocol == "http" || peer.Protocol == "https" {
+			// OK+		if peersList.Debug {
+			if peersList.Debug {
+				fmt.Println("peer", peer.Peername,"peer-protocol", peer.Protocol, ", results: found =>", found, "allow-access =>", allowaccess, "admin =>", admin, "key =>", key, "url =>", requestUrl, "src =>", src)
+			}
+		} else {
+			continue
+		}
 		if err != nil {
 			if peersList.Debug {
 				fmt.Println("peer", peer.Peername, "had an error", err, "while checking:", requestUrl, "Allow acces:", allowaccess)

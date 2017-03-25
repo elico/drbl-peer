@@ -159,6 +159,9 @@ func (instance *DrblClient) HttpCheckUrlWithSrc(requestUrl, src string, debug bo
 
 	switch {
 	case instance.Protocol == "http" || instance.Protocol == "https":
+		if debug {
+			fmt.Fprintln(os.Stderr, "testing =>",requestUrl ,"src =>",src , "to blacklisting type =>",  instance.Protocol )
+		}
 		testurl, _ := url.Parse(instance.Protocol + "://" + instance.Peername + ":" + strconv.Itoa(instance.Port) + instance.Path)
 		testurlVals := url.Values{}
 		testurlVals.Set("url", requestUrl)
