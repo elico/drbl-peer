@@ -8,6 +8,7 @@ import (
 	//"github.com/bogdanovich/dns_resolver"
 	"net/http"
 	"net/url"
+
 	"strconv"
 	"strings"
 
@@ -141,6 +142,52 @@ func (instance *DrblClient) Check(hostname string, debug bool) (bool, bool, bool
 				}
 			}
 		}
+	}
+	return found, allow, admin, key, nil
+}
+
+func (instance *DrblClient) HttpCheckUrlWithSrc(requestUrl, src string, debug bool) (bool, bool, bool, string, error) {
+	found := false
+	admin := false
+	allow := true
+	key := ""
+	// parse url
+	_, err := url.Parse(requestUrl)
+	if err != nil {
+		return found, allow, admin, key, err
+	}
+
+	switch {
+	case instance.Protocol == "http" || instance.Protocol == "https":
+		testurl, _ := url.Parse(instance.Protocol + "://" + instance.Peername + ":" + strconv.Itoa(instance.Port) + instance.Path)
+		testurlVals := url.Values{}
+		testurlVals.Set("url", requestUrl)
+		if govalidator.IsIP(src) {
+			testurlVals.Set("src", src)
+		}
+		testurl.RawQuery = testurlVals.Encode()
+
+		request, err := http.NewRequest("HEAD", testurl.String(), nil)
+		//request.SetBasicAuth(*user, *pass)
+
+		resp, err := instance.Client.Do(request)
+		if err != nil {
+			return found, allow, admin, key, err
+		}
+
+		if resp.Header.Get("X-Admin-Vote") == "YES" {
+			admin = true
+			found = true
+		}
+		if resp.Header.Get("X-Vote") == "BLOCK" {
+			found = true
+			allow = false
+		}
+
+		// For cases which debug is required you can use this key to see the BL VALUE
+		//resp.Header.Get("X-Rate")
+
+		key = resp.Header.Get("X-Rate-Key")
 	}
 	return found, allow, admin, key, nil
 }

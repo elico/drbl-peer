@@ -122,89 +122,89 @@ func NewPeerListFromYamlFile(filename string, hitWeight int64, timeout int, debu
 				fmt.Println(err)
 			}
 			continue
-			} else {
-				newlist.Peers = append(newlist.Peers, *peer)
-			}
-			if newlist.Debug {
-				fmt.Println("Peers number", int64(len(newlist.Peers)))
-			}
+		} else {
+			newlist.Peers = append(newlist.Peers, *peer)
+		}
+		if newlist.Debug {
+			fmt.Println("Peers number", int64(len(newlist.Peers)))
+		}
 	}
 	return newlist, nil
 }
 
 func NewPeerFromYaml(peer YamlPeerDrblName) (*DrblClient, error) {
 
-  		port := uint(peer.Port) //port
-			weight:= uint(peer.Weight) //weight
+	port := uint(peer.Port)     //port
+	weight := uint(peer.Weight) //weight
 
-			/*
-				switch {
-				case govalidator.IsIP(lparts[1]):
-					;;
-				case govalidator.IsDNSName(lparts[1]):
-					if lparts[0] != "http" {
-						addr, err := net.LookupHost(lparts[1])
-						if err != nil {
-								return &DrblClient{}, fmt.Errorf("%s hostname cannot be resolved", lparts[1])
-						}
-						// Choosing a static IP address
-						lparts[1] = addr[0]
-					}
-				default:
-					return &DrblClient{}, fmt.Errorf("%s is not a valid hostname or ip address", lparts[1])
+	/*
+		switch {
+		case govalidator.IsIP(lparts[1]):
+			;;
+		case govalidator.IsDNSName(lparts[1]):
+			if lparts[0] != "http" {
+				addr, err := net.LookupHost(lparts[1])
+				if err != nil {
+						return &DrblClient{}, fmt.Errorf("%s hostname cannot be resolved", lparts[1])
 				}
-			*/
-			if !govalidator.IsHost(peer.Host) {
-				return &DrblClient{}, fmt.Errorf("%s is not a valid hostname or ip address", peer.Host)
+				// Choosing a static IP address
+				lparts[1] = addr[0]
 			}
-			// http\dns\dnsrbl ip\domain /path/vote/ port weigth bl ip's
-			// 0								1					2						3			4			5
-			switch {
-			case peer.Type == "http" || peer.Type == "https":
-				return &DrblClient{peer.Host,
-					peer.Path,
-					int(port),
-					int64(weight),
-					peer.Type,
-					[]string{},
-					dns_resolver.New([]string{peer.Host}),
-					&http.Client{},
-				}, nil
+		default:
+			return &DrblClient{}, fmt.Errorf("%s is not a valid hostname or ip address", lparts[1])
+		}
+	*/
+	if !govalidator.IsHost(peer.Host) {
+		return &DrblClient{}, fmt.Errorf("%s is not a valid hostname or ip address", peer.Host)
+	}
+	// http\dns\dnsrbl ip\domain /path/vote/ port weigth bl ip's
+	// 0								1					2						3			4			5
+	switch {
+	case peer.Type == "http" || peer.Type == "https":
+		return &DrblClient{peer.Host,
+			peer.Path,
+			int(port),
+			int64(weight),
+			peer.Type,
+			[]string{},
+			dns_resolver.New([]string{peer.Host}),
+			&http.Client{},
+		}, nil
 
-			case peer.Type == "dns":
-				blIpAddr := make([]string, 1)
-				for _, addr := range peer.Expected {
-					if govalidator.IsIPv4(addr) {
-						blIpAddr = append(blIpAddr, addr)
-					}
-				}
-				return &DrblClient{peer.Host,
-					peer.Path,
-					int(port),
-					int64(weight),
-					peer.Type,
-					blIpAddr,
-					dns_resolver.NewWithPort([]string{peer.Host}, strconv.Itoa(int(port))),
-					&http.Client{},
-				}, nil
-			case peer.Type == "dnsrbl":
-				blIpAddr := make([]string, 1)
-				for _, addr := range peer.Expected {
-					if govalidator.IsIPv4(addr) {
-						blIpAddr = append(blIpAddr, addr)
-					}
-				}
-				return &DrblClient{peer.Host,
-					peer.Path,
-					int(port),
-					int64(weight),
-					peer.Type,
-					blIpAddr,
-					dns_resolver.NewWithPort([]string{peer.Host}, strconv.Itoa(int(port))),
-					&http.Client{},
-				}, nil
+	case peer.Type == "dns":
+		blIpAddr := make([]string, 1)
+		for _, addr := range peer.Expected {
+			if govalidator.IsIPv4(addr) {
+				blIpAddr = append(blIpAddr, addr)
 			}
-		return &DrblClient{}, fmt.Errorf("drblpeer: malformed peerYaml %s", peer)
+		}
+		return &DrblClient{peer.Host,
+			peer.Path,
+			int(port),
+			int64(weight),
+			peer.Type,
+			blIpAddr,
+			dns_resolver.NewWithPort([]string{peer.Host}, strconv.Itoa(int(port))),
+			&http.Client{},
+		}, nil
+	case peer.Type == "dnsrbl":
+		blIpAddr := make([]string, 1)
+		for _, addr := range peer.Expected {
+			if govalidator.IsIPv4(addr) {
+				blIpAddr = append(blIpAddr, addr)
+			}
+		}
+		return &DrblClient{peer.Host,
+			peer.Path,
+			int(port),
+			int64(weight),
+			peer.Type,
+			blIpAddr,
+			dns_resolver.NewWithPort([]string{peer.Host}, strconv.Itoa(int(port))),
+			&http.Client{},
+		}, nil
+	}
+	return &DrblClient{}, fmt.Errorf("drblpeer: malformed peerYaml %s", peer)
 }
 
 func NewPeerFromLine(peerline string) (*DrblClient, error) {
@@ -374,6 +374,50 @@ func (peersList *DrblPeers) Check(hostname string) (bool, int64) {
 		} else {
 			if peersList.Debug {
 				fmt.Println("Peer", peer.Peername, "weigth =>", peer.Weight, "hostname =>,", hostname, "allowaccess", "found =>", found)
+			}
+		}
+	}
+	if localWeight <= int64(0) {
+		block = true
+	}
+	return block, localWeight
+}
+
+func (peersList *DrblPeers) CheckUrlWithSrc(requestUrl, src string) (bool, int64) {
+	block := false
+
+	localWeight := peersList.HitWeight
+
+	for _, peer := range peersList.Peers {
+		if peer.Protocol != "http" || peer.Protocol != "https" {
+			continue
+		}
+		if localWeight <= int64(0) {
+			block = true
+			return block, localWeight
+		}
+
+		found, allowaccess, admin, key, err := peer.HttpCheckUrlWithSrc(requestUrl, src, peersList.Debug)
+		if err != nil {
+			if peersList.Debug {
+				fmt.Println("peer", peer.Peername, "had an error", err, "while checking:", requestUrl, "Allow acces:", allowaccess)
+			}
+			continue
+		}
+		if peersList.Debug {
+			fmt.Println("peer", peer.Peername, ", results: found =>", found, "allow-access =>", allowaccess, "admin =>", admin, "key =>", key, "url =>", requestUrl, "src =>", src)
+		}
+
+		if found {
+			atomic.AddInt64(&localWeight, -peer.Weight)
+		}
+		if found && !allowaccess {
+			if peersList.Debug {
+				fmt.Println("Peer", peer.Peername, "weigth =>", peer.Weight, "url =>,", requestUrl, "!allowaccess", "src =>", src, "found =>", found)
+			}
+		} else {
+			if peersList.Debug {
+				fmt.Println("Peer", peer.Peername, "weigth =>", peer.Weight, "url =>,", requestUrl, "allowaccess", "src =>", src, "found =>", found)
 			}
 		}
 	}
