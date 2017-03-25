@@ -1,5 +1,5 @@
 
-all: linux windows macos freebsd openbsd netbsd solaris arm5 arm6 arm7 arm8
+all: linux windows macos freebsd openbsd netbsd solaris arm5 arm6 arm7 arm8 pack
 
 update:
 	go get -v -u github.com/elico/drbl-peer
