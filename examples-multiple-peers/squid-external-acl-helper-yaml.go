@@ -7,6 +7,7 @@ import (
 	"github.com/elico/drbl-peer"
 	"os"
 	"strconv"
+	"sync"
 	"strings"
 )
 
@@ -17,7 +18,8 @@ var debug bool
 
 var drblPeers *drblpeer.DrblPeers
 
-func process_request(line string) {
+func process_request(line string, wg *sync.WaitGroup) {
+        defer wg.Done()
 	answer := "ERR"
 	lparts := strings.Split(strings.TrimRight(line, "\n"), " ")
 	if len(lparts[0]) > 0 {
@@ -46,6 +48,8 @@ func main() {
 		fmt.Println("Peers", drblPeers)
 	}
 
+	var wg sync.WaitGroup
+
 	reader := bufio.NewReader(os.Stdin)
 
 	for {
@@ -57,9 +61,12 @@ func main() {
 		}
 		if strings.HasPrefix(line, "q") || strings.HasPrefix(line, "Q") {
 			fmt.Fprintln(os.Stderr, "ERRlog: Exiting cleanly")
+			os.Exit(0)
 			break
 		}
 
-		go process_request(line)
+		wg.Add(1)
+		go process_request(line, &wg)
 	}
+	wg.Wait()
 }
