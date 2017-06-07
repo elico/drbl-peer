@@ -1,9 +1,9 @@
 peers:
    - name: "sb2"
      type: "http"
-     host: "192.168.89.33"
+     host: "sbv2.ngtech.co.il"
      path: "/sbv2/01/url/"
-     port: 8080
+     port: 18080
      weight: 128
      expected:
        - "0.0.0.0"
