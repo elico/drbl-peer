@@ -47,8 +47,8 @@ peers:
        - "0.0.0.0"
    - name: "sb2"
      type: "http"
-     host: "10.0.0.18"
-     path: "/sbv2/01/url/"
+     host: "192.168.89.33"
+     path: "/sbv2/01/dom/"
      port: 8080
      weight: 128
      expected:

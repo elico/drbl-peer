@@ -179,7 +179,7 @@ func (instance *DrblClient) HttpCheckUrlWithSrc(requestUrl, src string, debug bo
 		resp, err := instance.Client.Do(request)
 		if err != nil {
 			if debug {
-				fmt.Fprintln(os.Stderr, "testing =>",requestUrl ,"testurl =>", testurl.String(), "src =>",src , "error =>",  err )
+				fmt.Fprintln(os.Stderr, "testing =>" , requestUrl ,"testurl =>", testurl.String(), "src =>",src , "error =>",  err )
 				fmt.Fprintln(os.Stderr, "RESPOSE =>", resp )
 			}
 			return found, allow, admin, key, err

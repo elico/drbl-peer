@@ -1,10 +1,10 @@
 package main
 
 import (
+	"github.com/elico/drbl-peer"
 	"bufio"
 	"flag"
 	"fmt"
-	"github.com/elico/drbl-peer"
 	"os"
 	"strconv"
 	"strings"
