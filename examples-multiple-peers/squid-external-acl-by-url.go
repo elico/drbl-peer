@@ -16,6 +16,7 @@ var timeout int
 var peersFileName string
 var debug bool
 var yamlconfig bool
+var feederMode bool
 
 var drblPeers *drblpeer.DrblPeers
 
@@ -24,6 +25,9 @@ func process_request(line string, wg *sync.WaitGroup) {
 
 	answer := "ERR"
 	lparts := strings.Split(strings.TrimRight(line, "\n"), " ")
+	if feederMode {
+		fmt.Println(lparts[0] + " OK feedermode=1")
+	}
 	if len(lparts[0]) > 1 {
 		if debug {
 			fmt.Fprintln(os.Stderr, "ERRlog: Proccessing request => \""+strings.TrimRight(line, "\n")+"\"")
@@ -33,13 +37,16 @@ func process_request(line string, wg *sync.WaitGroup) {
 	if block {
 		answer = "OK"
 	}
-	fmt.Println(lparts[0] + " " + answer + " weight=" + strconv.FormatInt(weight, 10))
+	if !feederMode {
+		fmt.Println(lparts[0] + " " + answer + " weight=" + strconv.FormatInt(weight, 10))
+	}
 }
 
 func main() {
 	flag.IntVar(&blockWeight, "block-weight", 128, "Peers blacklist weight")
 	flag.IntVar(&timeout, "query-timeout", 30, "Timeout for all peers response")
 	flag.BoolVar(&debug, "debug", false, "Run in debug mode")
+	flag.BoolVar(&feederMode, "fedder-mode", false, "Feeder Mode ON means that all requests will get the response of OK first and then in background will run the query")
 	flag.BoolVar(&yamlconfig, "yamlconfig", false, "Use a yaml formated blacklist file")
 	flag.StringVar(&peersFileName, "peers-filename", "peersfile.txt", "Blacklists peers filename")
 
