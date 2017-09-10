@@ -346,6 +346,15 @@ func (peersList *DrblPeers) Check(hostname string) (bool, int64) {
 	block := false
 
 	localWeight := peersList.HitWeight
+	if len(peersList.Peers) < 1 {
+		localWeight = 100 * 1024
+	}
+	if peersList.Debug {
+		fmt.Println("Peerlist size", peersList.Peers, "while checking:", hostname, "Local weigth:", localWeight)
+	}
+	if len(peersList.Peers) < 1 {
+		return block, localWeight
+	}
 
 	for _, peer := range peersList.Peers {
 		if localWeight <= int64(0) {
@@ -387,6 +396,15 @@ func (peersList *DrblPeers) CheckUrlWithSrc(requestUrl, src string) (bool, int64
 	block := false
 
 	localWeight := peersList.HitWeight
+	if len(peersList.Peers) < 1 {
+		localWeight = 100 * 1024
+	}
+	if peersList.Debug {
+		fmt.Println("Peerlist size", peersList.Peers, "while checking:", requestUrl, "For Source", src, "Local weigth:", localWeight)
+	}
+	if len(peersList.Peers) < 1 {
+		return block, localWeight
+	}
 
 	for _, peer := range peersList.Peers {
 
@@ -399,7 +417,7 @@ func (peersList *DrblPeers) CheckUrlWithSrc(requestUrl, src string) (bool, int64
 		if peer.Protocol == "http" || peer.Protocol == "https" {
 			// OK+		if peersList.Debug {
 			if peersList.Debug {
-				fmt.Println("peer", peer.Peername,"peer-protocol", peer.Protocol, ", results: found =>", found, "allow-access =>", allowaccess, "admin =>", admin, "url =>", requestUrl, "src =>", src)
+				fmt.Println("peer", peer.Peername, "peer-protocol", peer.Protocol, ", results: found =>", found, "allow-access =>", allowaccess, "admin =>", admin, "url =>", requestUrl, "src =>", src)
 			}
 		} else {
 			continue

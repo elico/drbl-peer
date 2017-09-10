@@ -46,7 +46,7 @@ func main() {
 	flag.IntVar(&blockWeight, "block-weight", 128, "Peers blacklist weight")
 	flag.IntVar(&timeout, "query-timeout", 30, "Timeout for all peers response")
 	flag.BoolVar(&debug, "debug", false, "Run in debug mode")
-	flag.BoolVar(&feederMode, "fedder-mode", false, "Feeder Mode ON means that all requests will get the response of OK first and then in background will run the query")
+	flag.BoolVar(&feederMode, "feeder-mode", false, "Feeder Mode ON means that all requests will get the response of OK first and then in background will run the query")
 	flag.BoolVar(&yamlconfig, "yamlconfig", false, "Use a yaml formated blacklist file")
 	flag.StringVar(&peersFileName, "peers-filename", "peersfile.txt", "Blacklists peers filename")
 
