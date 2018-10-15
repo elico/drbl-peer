@@ -16,6 +16,8 @@ var timeout int
 var peersFileName string
 var debug bool
 
+var remoteLoggingMode bool
+
 var drblPeers *drblpeer.DrblPeers
 
 func process_request(line string, wg *sync.WaitGroup) {
@@ -27,11 +29,17 @@ func process_request(line string, wg *sync.WaitGroup) {
 			fmt.Fprintln(os.Stderr, "ERRlog: Proccessing request => \""+strings.TrimRight(line, "\n")+"\"")
 		}
 	}
+	if remoteLoggingMode {
+		fmt.Println(lparts[0] + " " + answer + " weight=-1")
+	}
+
 	block, weight := drblPeers.Check(lparts[1])
 	if block {
 		answer = "OK"
 	}
-	fmt.Println(lparts[0] + " " + answer + " weight=" + strconv.FormatInt(weight, 10))
+	if !remoteLoggingMode {
+		fmt.Println(lparts[0] + " " + answer + " weight=" + strconv.FormatInt(weight, 10))
+	}
 }
 
 func main() {
@@ -39,6 +47,7 @@ func main() {
 	flag.IntVar(&timeout, "query-timeout", 30, "Timeout for all peers response")
 	flag.BoolVar(&debug, "debug", false, "Run in debug mode")
 	flag.StringVar(&peersFileName, "peers-filename", "peersfile.yaml", "Blacklists peers filename")
+	flag.BoolVar(&remoteLoggingMode, "logger-mode", false, "Run in logging mode")
 
 	flag.Parse()
 

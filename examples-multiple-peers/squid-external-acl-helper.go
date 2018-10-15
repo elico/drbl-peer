@@ -17,6 +17,8 @@ var peersFileName string
 var debug bool
 var yamlconfig bool
 
+var remoteLoggingMode bool
+
 var drblPeers *drblpeer.DrblPeers
 
 func process_request(line string, wg *sync.WaitGroup) {
@@ -28,18 +30,25 @@ func process_request(line string, wg *sync.WaitGroup) {
 			fmt.Fprintln(os.Stderr, "ERRlog: Proccessing request => \""+strings.TrimRight(line, "\n")+"\"")
 		}
 	}
+	if remoteLoggingMode {
+		fmt.Println(lparts[0] + " " + answer + " weight=-1")
+
+	}
 	block, weight := drblPeers.Check(lparts[1])
 	if block {
 		answer = "OK"
 	}
-	fmt.Println(lparts[0] + " " + answer + " weight=" + strconv.FormatInt(weight, 10))
+	if !remoteLoggingMode {
+		fmt.Println(lparts[0] + " " + answer + " weight=" + strconv.FormatInt(weight, 10))
+	}
 }
 
 func main() {
 	flag.IntVar(&blockWeight, "block-weight", 128, "Peers blacklist weight")
 	flag.IntVar(&timeout, "query-timeout", 30, "Timeout for all peers response")
 	flag.BoolVar(&debug, "debug", false, "Run in debug mode")
-	flag.BoolVar(&yamlconfig, "yamlconfig", false, "Use a yaml formated blacklist file")
+	flag.BoolVar(&yamlconfig, "yamlconfig", false, "Use a yaml formated blacklist file instead of a text based")
+	flag.BoolVar(&remoteLoggingMode, "logger-mode", false, "Run in logging mode")
 	flag.StringVar(&peersFileName, "peers-filename", "peersfile.txt", "Blacklists peers filename")
 
 	flag.Parse()
