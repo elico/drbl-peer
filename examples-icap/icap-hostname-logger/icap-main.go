@@ -171,16 +171,6 @@ func hostnameLogger(w icap.ResponseWriter, req *icap.Request) {
 			}
 		}
 
-		if debug > 0 {
-			fmt.Println("Request hostname:", req.Request.URL.Hostname(), "is not a googlevideo.com match")
-			fmt.Println("Request query UPN value:", req.Request.URL.Query().Get("upn"))
-		}
-
-		if debug > 0 {
-			fmt.Println("204 allowed?", allow204)
-			fmt.Println("modified?", modified)
-			fmt.Println("end of the line 204 response!.. Shouldn't happen.")
-		}
 		var testHostname string
 		switch req.Request.Method {
 		case "CONNECT":
@@ -223,10 +213,19 @@ func hostnameLogger(w icap.ResponseWriter, req *icap.Request) {
 		}
 
 		go func() {
-			_, _ = drblPeers.Check(testHostname)
+			peerMatch, peersRating := drblPeers.Check(testHostname)
+			if debug > 0 {
+				fmt.Println("ended drblpeer check for:", testHostname)
+				fmt.Println("drblpeer check results for:", testHostname, "Match:", peerMatch, "Rating:", peersRating)
+			}
 		}()
 
 		w.WriteHeader(204, nil, false)
+		if debug > 0 {
+			fmt.Println("204 allowed?", allow204)
+			fmt.Println("modified?", modified)
+			fmt.Println("End of REQMOD")
+		}
 		return
 	case "RESPMOD":
 		w.WriteHeader(204, nil, false)
@@ -316,6 +315,7 @@ func init() {
 
 	if debug > 0 {
 		fmt.Println("Peers", drblPeers)
+		fmt.Println("Peers", drblPeers.Peers)
 	}
 }
 

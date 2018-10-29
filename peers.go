@@ -15,6 +15,7 @@ import (
 	"github.com/elico/dns_resolver"
 )
 
+// DrblClient ---
 type DrblClient struct {
 	Peername    string
 	Path        string
@@ -25,6 +26,9 @@ type DrblClient struct {
 	Resolver    *dns_resolver.DnsResolver
 	Client      *http.Client
 }
+
+// DRBLClientUA ---
+var DRBLClientUA = "DRBL-Peer Client V1"
 
 func New(peerName, protocol, path string, port int, weight int64, bladdr []string) *DrblClient {
 	return &DrblClient{peerName,
@@ -60,6 +64,7 @@ func (instance *DrblClient) Check(hostname string, debug bool) (bool, bool, bool
 
 		request, err := http.NewRequest("HEAD", testurl.String(), nil)
 		//request.SetBasicAuth(*user, *pass)
+		request.Header.Set("User-Agent", DRBLClientUA)
 
 		resp, err := instance.Client.Do(request)
 		if err != nil {
@@ -155,15 +160,15 @@ func (instance *DrblClient) HttpCheckUrlWithSrc(requestUrl, src string, debug bo
 	_, err := url.Parse(requestUrl)
 	if err != nil {
 		if debug {
-			fmt.Fprintln(os.Stderr, "testing =>",requestUrl ,"src =>",src , "error =>",  err )
-	  }
+			fmt.Fprintln(os.Stderr, "testing =>", requestUrl, "src =>", src, "error =>", err)
+		}
 		return found, allow, admin, key, err
 	}
 
 	switch {
 	case instance.Protocol == "http" || instance.Protocol == "https":
 		if debug {
-			fmt.Fprintln(os.Stderr, "testing =>",requestUrl ,"src =>",src , "to blacklisting type =>",  instance.Protocol )
+			fmt.Fprintln(os.Stderr, "testing =>", requestUrl, "src =>", src, "to blacklisting type =>", instance.Protocol)
 		}
 		testurl, _ := url.Parse(instance.Protocol + "://" + instance.Peername + ":" + strconv.Itoa(instance.Port) + instance.Path)
 		testurlVals := url.Values{}
@@ -179,8 +184,8 @@ func (instance *DrblClient) HttpCheckUrlWithSrc(requestUrl, src string, debug bo
 		resp, err := instance.Client.Do(request)
 		if err != nil {
 			if debug {
-				fmt.Fprintln(os.Stderr, "testing =>" , requestUrl ,"testurl =>", testurl.String(), "src =>",src , "error =>",  err )
-				fmt.Fprintln(os.Stderr, "RESPOSE =>", resp )
+				fmt.Fprintln(os.Stderr, "testing =>", requestUrl, "testurl =>", testurl.String(), "src =>", src, "error =>", err)
+				fmt.Fprintln(os.Stderr, "RESPOSE =>", resp)
 			}
 			return found, allow, admin, key, err
 		}
