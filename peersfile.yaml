@@ -1,22 +1,23 @@
 peers:
-   - name: "symantec1"
-     type: "dns"
-     host: "199.85.126.20"
-     port: 53
-     weight: 128
-     path: "/"
-     expected:
-       - "156.154.175.216"
-       - "156.154.176.216"
-   - name: "symantec2"
-     type: "dns"
-     host: "199.85.126.20"
-     port: 53
-     weight: 128
-     path: "/"
-     expected:
-       - "156.154.175.216"
-       - "156.154.176.216"
+# Symantec was removed due to resolving gemmei.ftp.acc.umu.se as malware
+#   - name: "symantec1"
+#     type: "dns"
+#     host: "199.85.126.20"
+#     port: 53
+#     weight: 128
+#     path: "/"
+#     expected:
+#       - "156.154.175.216"
+#       - "156.154.176.216"
+#   - name: "symantec2"
+#     type: "dns"
+#     host: "199.85.126.20"
+#     port: 53
+#     weight: 128
+#     path: "/"
+#     expected:
+#       - "156.154.175.216"
+#       - "156.154.176.216"
    - name: "opendns1"
      type: "dns"
      host: "208.67.222.123"
