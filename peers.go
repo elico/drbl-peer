@@ -97,7 +97,7 @@ func (instance *DrblClient) Check(hostname string, debug bool) (bool, bool, bool
 				case strings.Contains(err.Error(), "NXDOMAIN"):
 					//it's fine and possible
 				default:
-					fmt.Println(instance, "Got error on lookup for", hostname, "ERROR:", err)
+					fmt.Fprintln(os.Stderr, instance, "Got error on lookup for", hostname, "ERROR:", err)
 				}
 
 				return found, true, admin, key, err
@@ -117,6 +117,25 @@ func (instance *DrblClient) Check(hostname string, debug bool) (bool, bool, bool
 						break
 					}
 				}
+			}
+		}
+	case instance.Protocol == "dnsquad":
+		if len(hostname) > 1 {
+			if debug {
+				fmt.Fprintln(os.Stderr, "trying to match hostname =>", hostname, "to dns hostname =>", hostname)
+			}
+			_, err := instance.Resolver.LookupHost(hostname)
+			if err != nil {
+				//SHould not always be on.. dpends on the err For now it's on
+				switch {
+				case strings.Contains(err.Error(), "NXDOMAIN"):
+					//it's fine and possible but gets a HIT and needs to be reduced from the score compared to the domain NS rating or another way to analyse it
+
+				default:
+					fmt.Fprintln(os.Stderr, instance, "Got error on lookup for", hostname, "ERROR:", err)
+				}
+
+				return found, true, admin, key, err
 			}
 		}
 
